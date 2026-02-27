@@ -56,7 +56,8 @@ class SellerApplicationAdmin(admin.ModelAdmin):
             profile.company_name = app.company_name
             profile.phone = app.phone
             profile.save()
-        self.message_user(request, f'Одобрено заявок: {pending.count()}')
+        usernames = ', '.join(a.user.username for a in pending)
+        self.message_user(request, f'Одобрено заявок: {pending.count()}. Логины: {usernames} — пусть войдут под своим паролем.')
 
     @admin.action(description='Отклонить заявки')
     def reject_applications(self, request, queryset):
