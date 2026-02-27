@@ -15,7 +15,7 @@
 | **Start Command** | `gunicorn config.wsgi:application` |
 | **Runtime** | Python 3 |
 
-> ⚠️ **Release Command обязателен** — без него таблицы БД не создаются (`no such table: shop_product`).
+> ⚠️ **Build Command** обязательно `./build.sh` — иначе не выполняются collectstatic и migrate.
 
 ## Переменные окружения (Environment Variables)
 
@@ -47,8 +47,13 @@ python manage.py createsuperuser
 
 ## Ошибка `no such table: shop_product`
 
-1. **Release Command**: Добавьте в Render Dashboard → Settings → Release Command: `python manage.py migrate --noinput`
-2. **PostgreSQL**: Создайте PostgreSQL и добавьте `DATABASE_URL`. Без неё Django использует SQLite, а диск Render **эфемерный** — SQLite теряет данные при каждом редеплое/рестарте.
+В Render Dashboard → ваш сервис shop → **Settings**:
+
+1. **Build Command** → замените на `./build.sh` (если там `pip install -r requirements.txt`, миграции не выполняются).
+2. **Release Command** → добавьте `python manage.py migrate --noinput` (если нет).
+3. **PostgreSQL**: Создайте БД, добавьте `DATABASE_URL`. Без неё используется SQLite — диск эфемерный, данные теряются при редеплое.
+
+Затем **Manual Deploy** → Deploy latest commit.
 
 ## Медиафайлы
 
