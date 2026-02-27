@@ -10,7 +10,7 @@ services:
     runtime: python
     buildCommand: "./build.sh"
     releaseCommand: "python manage.py migrate --noinput"
-    startCommand: "gunicorn config.wsgi:application"
+    startCommand: "python manage.py migrate --noinput && gunicorn config.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"

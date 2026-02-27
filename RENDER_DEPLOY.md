@@ -12,7 +12,7 @@
 |----------|----------|
 | **Build Command** | `./build.sh` |
 | **Release Command** | `python manage.py migrate --noinput` |
-| **Start Command** | `gunicorn config.wsgi:application` |
+| **Start Command** | `python manage.py migrate --noinput && gunicorn config.wsgi:application` |
 | **Runtime** | Python 3 |
 
 > ⚠️ **Build Command** обязательно `./build.sh` — иначе не выполняются collectstatic и migrate.
@@ -47,13 +47,15 @@ python manage.py createsuperuser
 
 ## Ошибка `no such table: shop_product`
 
-В Render Dashboard → ваш сервис shop → **Settings**:
+В Render Dashboard → ваш сервис shop → **Settings** → **Start Command** замените на:
 
-1. **Build Command** → замените на `./build.sh` (если там `pip install -r requirements.txt`, миграции не выполняются).
-2. **Release Command** → добавьте `python manage.py migrate --noinput` (если нет).
-3. **PostgreSQL**: Создайте БД, добавьте `DATABASE_URL`. Без неё используется SQLite — диск эфемерный, данные теряются при редеплое.
+```
+python manage.py migrate --noinput && gunicorn config.wsgi:application
+```
 
-Затем **Manual Deploy** → Deploy latest commit.
+Миграции выполнятся при каждом запуске — таблицы создадутся. Затем **Manual Deploy**.
+
+> Опционально: PostgreSQL + `DATABASE_URL` — без них SQLite теряет данные при редеплое.
 
 ## Outbound IP (для whitelist)
 
