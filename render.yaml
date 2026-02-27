@@ -1,0 +1,19 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: shop
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: RENDER
+        value: "True"
+    # Подключить PostgreSQL:
+    # 1. Создать PostgreSQL в Render Dashboard
+    # 2. Добавить DATABASE_URL в Environment Variables (внутренняя ссылка)

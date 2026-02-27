@@ -2,6 +2,7 @@
 Django settings for Shop project.
 """
 
+import os
 from pathlib import Path
 from decouple import config, Csv
 
@@ -12,6 +13,12 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-only-change-me')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+
+# Render.com — автодобавление хоста
+if config('RENDER', default=False, cast=bool):
+    host = os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')
+    if host:
+        ALLOWED_HOSTS.append(host.split('://')[-1].split('/')[0])
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -25,6 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -56,12 +64,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# База данных: PostgreSQL на Render, иначе SQLite
+if config('DATABASE_URL', default=''):
+    import dj_database_url
+    DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -81,6 +94,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -92,7 +106,7 @@ LOGIN_REDIRECT_URL = '/'
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 LOGOUT_REDIRECT_URL = '/'
 
-# Безопасность для продакшена (когда DEBUG=False)
+
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
