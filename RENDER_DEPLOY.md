@@ -11,8 +11,11 @@
 | Параметр | Значение |
 |----------|----------|
 | **Build Command** | `./build.sh` |
+| **Release Command** | `python manage.py migrate --noinput` |
 | **Start Command** | `gunicorn config.wsgi:application` |
 | **Runtime** | Python 3 |
+
+> ⚠️ **Release Command обязателен** — без него таблицы БД не создаются (`no such table: shop_product`).
 
 ## Переменные окружения (Environment Variables)
 
@@ -42,7 +45,12 @@
 python manage.py createsuperuser
 ```
 
-## Важно: медиафайлы
+## Ошибка `no such table: shop_product`
+
+1. **Release Command**: Добавьте в Render Dashboard → Settings → Release Command: `python manage.py migrate --noinput`
+2. **PostgreSQL**: Создайте PostgreSQL и добавьте `DATABASE_URL`. Без неё Django использует SQLite, а диск Render **эфемерный** — SQLite теряет данные при каждом редеплое/рестарте.
+
+## Медиафайлы
 
 Диск на Render **эфемерный** — загруженные изображения товаров теряются при каждом редеплое.
 

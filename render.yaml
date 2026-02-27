@@ -4,6 +4,7 @@ services:
     name: shop
     runtime: python
     buildCommand: "./build.sh"
+    releaseCommand: "python manage.py migrate --noinput"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
