@@ -1,0 +1,46 @@
+{% extends 'shop/seller_layout.html' %}
+{% load static %}
+
+{% block title %}Чаты — Shop{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/chat/chat.css' %}">
+{% endblock %}
+
+{% block seller_content %}
+<div class="chat-list-page">
+    <div class="chat-list-header">
+        <h2 class="chat-list-title"><i class="bi bi-chat-dots me-2"></i>Чаты</h2>
+        <a href="{% url 'chat_start' %}" class="btn btn-shop-primary"><i class="bi bi-plus-circle me-1"></i>Новый чат</a>
+    </div>
+    {% if chats %}
+    <div class="chat-list">
+        {% for chat in chats %}
+        <a href="{% url 'chat_detail' pk=chat.pk %}" class="chat-card">
+            <div class="chat-avatar"><i class="bi bi-person-circle"></i></div>
+            <div class="chat-info">
+                <div class="chat-name">
+                    {% if chat.other_user %}{{ chat.other_user.username }}{% else %}Чат{% endif %}
+                    {% if chat.product %}<span class="text-muted fw-normal"> · {{ chat.product.name }}</span>{% endif %}
+                </div>
+                {% if chat.last_message %}
+                <div class="chat-preview text-truncate">{{ chat.last_message.text|truncatewords:12 }}</div>
+                {% endif %}
+            </div>
+            {% if chat.last_message %}
+            <small class="text-muted text-nowrap">{{ chat.last_message.created_at|timesince }} назад</small>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card-shop p-5 text-center">
+        <div class="mb-3 icon-empty"><i class="bi bi-chat-dots"></i></div>
+        <h5 class="mb-2">Пока нет чатов</h5>
+        <p class="text-muted mb-4">Начните общение, нажав «Написать» на странице товара</p>
+        <a href="{% url 'seller_dashboard' %}" class="btn btn-shop-primary">В кабинет</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'shop/seller_layout.html' %}
+{% load static shop_extras %}
+
+{% block title %}Статистика — Shop{% endblock %}
+
+{% block extra_css %}{{ block.super }}{% endblock %}
+
+{% block seller_content %}
+<div class="seller-stats-page">
+    <h2 class="mb-3"><i class="bi bi-graph-up me-2"></i>Статистика</h2>
+    {% if user.profile.company_name %}
+    <p class="text-muted mb-3">{{ user.profile.company_name }}</p>
+    {% endif %}
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.total }}</div>
+            <div class="stat-label">Всего товаров</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.approved }}</div>
+            <div class="stat-label">Одобрено</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.pending }}</div>
+            <div class="stat-label">На модерации</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.rejected }}</div>
+            <div class="stat-label">Отклонено</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_likes }}</div>
+            <div class="stat-label">Лайков</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_comments }}</div>
+            <div class="stat-label">Комментариев</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ total_favorites }}</div>
+            <div class="stat-label">В избранном</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ followers_count }}</div>
+            <div class="stat-label">Подписчиков</div>
+        </div>
+    </div>
+
+    {% if chart_products %}
+    <div class="mb-4">
+        <h3 class="h6 mb-2"><i class="bi bi-bar-chart me-1"></i>По товарам</h3>
+        <div class="chart-wrap">
+            <canvas id="statsChart" height="180"></canvas>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if products %}
+    <div>
+        <h3 class="h6 mb-2"><i class="bi bi-box-seam me-1"></i>Последние товары</h3>
+        {% for p in products %}
+        <a href="{% url 'product_detail' pk=p.id %}" class="seller-product-row d-block">
+            <img src="{% product_image_src p %}" alt="">
+            <div class="info">
+                <div class="fw-medium small">{{ p.name }}</div>
+                <div class="small text-muted">{{ p.brand.name }} · {{ p.price }} ₽</div>
+                <span class="product-stat"><i class="bi bi-heart"></i> {{ p.likes_count }}</span>
+                <span class="product-stat ms-2"><i class="bi bi-chat"></i> {{ p.comments_count }}</span>
+            </div>
+            <span class="badge {% if p.publication_status == 'approved' %}bg-success{% elif p.publication_status == 'pending' %}bg-warning text-dark{% else %}bg-danger{% endif %} status-badge">
+                {{ p.get_publication_status_display }}
+            </span>
+        </a>
+        {% endfor %}
+        <a href="{% url 'seller_products' %}" class="btn btn-outline-secondary btn-sm mt-2">Все товары →</a>
+    </div>
+    {% else %}
+    <p class="text-muted">У вас пока нет товаров.</p>
+    <a href="{% url 'create_listing' %}" class="btn btn-shop-primary mt-2">Добавить первый товар</a>
+    {% endif %}
+</div>
+
+{% if chart_products %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% block extra_js %}
+{{ block.super }}
+<script>
+(function() {
+    const labels = [{% for p in chart_products %}'{{ p.name|escapejs|truncatewords:3 }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const likesData = [{% for p in chart_products %}{{ p.likes_count }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const commentsData = [{% for p in chart_products %}{{ p.comments_count }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    const favoritesData = [{% for p in chart_products %}{{ p.favorites_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
+    new Chart(document.getElementById('statsChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Лайки', data: likesData, backgroundColor: 'rgba(239, 68, 68, 0.7)' },
+                { label: 'Комментарии', data: commentsData, backgroundColor: 'rgba(59, 130, 246, 0.7)' },
+                { label: 'В избранном', data: favoritesData, backgroundColor: 'rgba(34, 197, 94, 0.7)' }
+            ]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: false }, y: { beginAtZero: true } } }
+    });
+})();
+</script>
+{% endblock %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,303 @@
+/* Mobile adaptation — touch targets, spacing, safe areas */
+/* Breakpoints: 576, 768, 991, 1200 */
+
+/* === Global mobile === */
+@media (max-width: 575px) {
+    html { -webkit-text-size-adjust: 100%; }
+    body { padding-bottom: env(safe-area-inset-bottom, 0); }
+    .page-content { min-height: 0; }
+    .container, .container-fluid {
+        padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+        padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+    }
+}
+
+/* === Navbar mobile === */
+@media (max-width: 991px) {
+    .navbar-shop {
+        padding: 0.5rem 0;
+        padding-top: calc(0.5rem + env(safe-area-inset-top, 0));
+    }
+    .navbar-collapse {
+        max-height: none;
+        overflow: visible;
+        padding: 0.75rem 0;
+    }
+    .nav-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    .nav-actions .nav-btn,
+    .nav-actions .nav-icon-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    .nav-user-dropdown-btn {
+        min-height: 44px;
+    }
+    /* Дропдаун юзера: без скролла, пусть вылезает поверх контента */
+    .nav-user-dropdown .dropdown-menu {
+        min-width: 220px;
+        max-width: min(280px, calc(100vw - 1.5rem));
+        margin-top: 0.5rem;
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+@media (max-width: 575px) {
+    .navbar-shop .navbar-brand { font-size: 1.15rem; }
+    .nav-actions .nav-btn span { display: none; }
+    .nav-user-dropdown-btn {
+        padding: 0.5rem 0.75rem;
+        gap: 0.35rem;
+    }
+    .nav-user-dropdown-btn .nav-user-name {
+        max-width: 90px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .nav-lang-dropdown { display: none; }
+    .messages-wrap { padding: 0.5rem 0.75rem; }
+    .nav-user-menu .dropdown-item {
+        padding: 0.75rem 1rem;
+        min-height: 44px;
+        align-items: center;
+    }
+    .nav-user-menu-header {
+        padding: 1rem;
+    }
+}
+
+/* === Search bar === */
+@media (max-width: 575px) {
+    .search-bar-wrap {
+        top: calc(52px + env(safe-area-inset-top, 0));
+        padding: 0.5rem 0.75rem;
+    }
+    .search-bar-form .btn-search-bar span { display: none; }
+}
+
+/* === Catalog / Home === */
+@media (max-width: 767px) {
+    .sidebar-sticky { top: 100px; }
+}
+
+@media (max-width: 575px) {
+    .container-fluid.px-3 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+    .container-fluid.py-3 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+    .catalog-header { top: calc(52px + env(safe-area-inset-top, 0)); }
+    .catalog-filters-row {
+        gap: 0.35rem;
+    }
+    .filter-select, .filter-price {
+        flex: 1;
+        min-width: 0;
+        max-width: none;
+    }
+    .mobile-filters {
+        padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    .mobile-filters a {
+        padding: 0.5rem 1rem;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+    }
+    .row.g-2, .row.g-md-3 { --bs-gutter-x: 0.5rem; --bs-gutter-y: 0.5rem; }
+}
+
+/* === Product cards === */
+@media (max-width: 575px) {
+    .product-card .fav-btn {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        min-height: 38px;
+        top: 0.35rem;
+        right: 0.35rem;
+    }
+    .product-card-follow .btn { min-height: 40px; }
+}
+
+/* === Profile page === */
+@media (max-width: 575px) {
+    .profile-page { padding: 1rem 0 !important; }
+    .profile-card { padding: 1.25rem !important; }
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    .profile-avatar { width: 64px; height: 64px; font-size: 2rem; }
+    .profile-name { font-size: 1.25rem; }
+    .profile-stats { margin-bottom: 1rem; }
+    .profile-stat-card {
+        padding: 0.75rem;
+    }
+    .profile-details dl { font-size: 0.9rem; }
+    .profile-actions {
+        flex-direction: column;
+    }
+    .profile-actions .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+}
+
+/* === Create listing form === */
+@media (max-width: 575px) {
+    .create-card { padding: 1.25rem !important; }
+    .create-form-fields .form-control,
+    .create-form-fields .form-select {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    .brand-block .brand-mode-group label {
+        padding: 0.5rem 0;
+        min-height: 44px;
+    }
+    .create-card .btn-shop-primary,
+    .create-card .btn-outline-secondary {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+}
+
+/* === Product detail === */
+@media (max-width: 575px) {
+    .product-detail-img { max-height: 320px; }
+    .product-actions {
+        flex-direction: column;
+    }
+    .product-actions .btn {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+    }
+}
+
+/* === Chat === */
+@media (max-width: 575px) {
+    .chat-list-page { padding: 0.75rem !important; }
+    .chat-card {
+        padding: 0.75rem 1rem;
+        min-height: 60px;
+    }
+    .chat-avatar { width: 44px; height: 44px; font-size: 1.25rem; }
+    .chat-input-form { padding: 0.75rem 1rem; }
+    .chat-input { font-size: 16px; }
+    .btn-chat-send {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    .message-edit-card { margin: 0.5rem; padding: 1rem; }
+}
+
+/* === Auth === */
+@media (max-width: 575px) {
+    .auth-page {
+        padding: 1rem 0.5rem;
+        align-items: flex-start;
+        padding-top: 2rem;
+    }
+    .auth-card {
+        padding: 1.5rem 1.25rem;
+        width: 100%;
+    }
+    .auth-card h1 { font-size: 1.35rem; }
+    .auth-card .form-control {
+        font-size: 16px;
+        min-height: 48px;
+    }
+    .auth-card .btn { min-height: 48px; }
+}
+
+/* === Seller layout === */
+@media (max-width: 991px) {
+    .seller-mobile-nav {
+        padding: 0.5rem 0.75rem;
+        margin-left: -1rem;
+        margin-right: -1rem;
+        -webkit-overflow-scrolling: touch;
+    }
+    .seller-mobile-nav .seller-nav-btn {
+        padding: 0.6rem 1rem;
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 575px) {
+    .seller-main { padding: 0.75rem; }
+    .seller-stats-page .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    .seller-stats-page .stat-card {
+        padding: 0.75rem;
+    }
+    .seller-stats-page .stat-value { font-size: 1.35rem; }
+    .seller-product-row {
+        flex-wrap: wrap;
+        padding: 0.6rem 0.75rem;
+    }
+    .seller-product-row img {
+        width: 40px;
+        height: 52px;
+    }
+    .seller-products-page .seller-product-thumb {
+        width: 48px;
+        height: 64px;
+    }
+}
+
+/* === Favorites === */
+@media (max-width: 575px) {
+    .fav-card .btn { min-height: 40px; }
+}
+
+/* === Pagination === */
+@media (max-width: 575px) {
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    .pagination .page-link {
+        min-width: 40px;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* === Notifications === */
+@media (max-width: 575px) {
+    .notification-item {
+        min-height: 60px;
+        padding: 1rem;
+    }
+}
+
+/* === Seller brand === */
+@media (max-width: 575px) {
+    .seller-brand-page .card { margin-bottom: 1rem; }
+    .seller-brand-page .btn { min-height: 44px; }
+    .list-group-item { padding: 0.75rem 1rem; }
+}
+
+/* === Become seller / Support === */
+@media (max-width: 575px) {
+    .seller-requirements { padding: 0.75rem !important; }
+}
+
+/* === Touch: prevent double-tap zoom on buttons === */
+@media (hover: none) and (pointer: coarse) {
+    button, a, .nav-btn, .nav-icon-btn, .form-check-input {
+        touch-action: manipulation;
+    }
+}

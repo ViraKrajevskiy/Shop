@@ -1,0 +1,80 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Профиль — Shop{% endblock %}
+
+{% block search_bar %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page container py-5 px-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="profile-header-info">
+                        <h1 class="profile-name">{{ user.username }}</h1>
+                        {% if profile %}
+                        <span class="profile-role">{{ profile.get_role_display }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="profile-stats row g-3 mb-4">
+                    <div class="col-6 col-md-4">
+                        <a href="{% url 'favorites' %}" class="profile-stat-card">
+                            <i class="bi bi-heart"></i>
+                            <span class="stat-value">{{ favorites_count|default:0 }}</span>
+                            <span class="stat-label">Избранное</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="profile-stat-card">
+                            <i class="bi bi-heart-fill text-danger"></i>
+                            <span class="stat-value">{{ likes_count|default:0 }}</span>
+                            <span class="stat-label">Лайков отдано</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-details">
+                    <h5 class="mb-3"><i class="bi bi-person me-2"></i>Данные</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-muted">Email</dt>
+                        <dd class="col-sm-8">{{ user.email|default:"Не указан" }}</dd>
+                        {% if profile %}
+                        {% if profile.company_name %}
+                        <dt class="col-sm-4 text-muted">Компания</dt>
+                        <dd class="col-sm-8">{{ profile.company_name }}</dd>
+                        {% endif %}
+                        {% if profile.phone %}
+                        <dt class="col-sm-4 text-muted">Телефон</dt>
+                        <dd class="col-sm-8">{{ profile.phone }}</dd>
+                        {% endif %}
+                        {% endif %}
+                    </dl>
+                </div>
+
+                <div class="profile-actions mt-4">
+                    {% if profile and profile.is_businessman %}
+                    <a href="{% url 'create_listing' %}" class="btn btn-shop-primary"><i class="bi bi-plus-circle me-2"></i>Подать объявление</a>
+                    <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-secondary">Кабинет продавца</a>
+                    {% else %}
+                    <a href="{% url 'become_seller' %}" class="btn btn-shop-primary"><i class="bi bi-shop me-2"></i>Стать продавцом</a>
+                    {% endif %}
+                    <a href="{% url 'favorites' %}" class="btn btn-outline-secondary">Избранное</a>
+                    <a href="{% url 'chat_list' %}" class="btn btn-outline-secondary">Чаты</a>
+                    <a href="{% url 'notifications_list' %}" class="btn btn-outline-secondary">Уведомления</a>
+                    <a href="{% url 'home' %}" class="btn btn-link text-muted">На главную</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

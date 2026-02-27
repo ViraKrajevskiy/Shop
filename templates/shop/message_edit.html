@@ -1,0 +1,29 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Редактировать сообщение{% endblock %}
+
+{% block search_bar %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-page">
+    <div class="chat-container" style="max-width: 480px;">
+        <div class="message-edit-card">
+            <a href="{% url 'chat_detail' pk=msg.chat_id %}" class="chat-back mb-3"><i class="bi bi-arrow-left"></i> Назад в чат</a>
+            <h5 class="mb-3">Редактировать сообщение</h5>
+            <form method="post" action="{% url 'message_edit' pk=msg.id %}">
+                {% csrf_token %}
+                <textarea name="text" class="form-control mb-3" rows="3" required>{{ msg.text }}</textarea>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-shop-primary">Сохранить</button>
+                    <a href="{% url 'chat_detail' pk=msg.chat_id %}" class="btn btn-outline-secondary">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

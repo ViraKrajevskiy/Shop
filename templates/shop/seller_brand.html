@@ -1,0 +1,56 @@
+{% extends 'shop/seller_layout.html' %}
+{% load static %}
+
+{% block title %}Магазин и бренды — Shop{% endblock %}
+
+{% block seller_content %}
+<div class="seller-brand-page">
+    <h2 class="mb-4"><i class="bi bi-shop me-2"></i>Магазин и бренды</h2>
+    <p class="text-muted mb-4">Данные магазина отображаются на карточках товаров. Свои бренды можно выбрать при размещении объявления.</p>
+
+    <div class="card p-4 mb-4" style="max-width: 480px;">
+        <h5 class="mb-3"><i class="bi bi-building me-1"></i>Данные магазина</h5>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_shop">
+            <div class="mb-3">
+                <label class="form-label">Название компании / магазина</label>
+                <input type="text" name="company_name" class="form-control" value="{{ profile.company_name|default:'' }}" placeholder="ООО «Стиль»" maxlength="200">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Телефон</label>
+                <input type="text" name="phone" class="form-control" value="{{ profile.phone|default:'' }}" placeholder="+7 999 123-45-67" maxlength="30">
+            </div>
+            <button type="submit" class="btn btn-shop-primary">Сохранить</button>
+        </form>
+    </div>
+
+    <div class="card p-4" style="max-width: 480px;">
+        <h5 class="mb-3"><i class="bi bi-badge-tm me-1"></i>Мои бренды</h5>
+        <p class="text-muted small mb-3">Добавьте бренды, которыми вы владеете. Их можно будет выбрать при размещении товара.</p>
+        <form method="post" class="d-flex gap-2 mb-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_brand">
+            <input type="text" name="brand_name" class="form-control" placeholder="Название бренда" maxlength="100">
+            <button type="submit" class="btn btn-shop-primary">Добавить</button>
+        </form>
+        {% if owned_brands %}
+        <ul class="list-group list-group-flush">
+            {% for b in owned_brands %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ b.name }}</span>
+                <form method="post" class="mb-0" onsubmit="return confirm('Удалить бренд?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="delete_brand">
+                    <input type="hidden" name="brand_id" value="{{ b.pk }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">Пока нет брендов. Добавьте первый.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Уведомления — Shop{% endblock %}
+
+{% block search_bar %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat/chat.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="notifications-page">
+        <h2 class="page-title mb-4"><i class="bi bi-bell me-2"></i>Уведомления</h2>
+        {% if notifications %}
+        <div class="notification-list">
+            {% for n in notifications %}
+            <a href="{% url 'notification_read' pk=n.id %}" class="notification-item {% if not n.is_read %}unread{% endif %}">
+                <div class="notification-icon">
+                    {% if n.ntype == 'chat' %}<i class="bi bi-chat-text"></i>
+                    {% elif n.ntype == 'new_product' %}<i class="bi bi-bag-plus"></i>
+                    {% else %}<i class="bi bi-bell"></i>{% endif %}
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">{{ n.title }}</div>
+                    <div class="notification-date">{{ n.created_at|timesince }} назад</div>
+                </div>
+                {% if not n.is_read %}<span class="notification-dot"></span>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-bell-slash display-4 mb-3"></i>
+            <p>Нет уведомлений</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

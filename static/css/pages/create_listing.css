@@ -1,0 +1,72 @@
+/* Форма подачи объявления */
+.brand-block .brand-mode-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.brand-block .brand-mode-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+.brand-block .brand-mode-group input[type="radio"] {
+    margin: 0;
+}
+.brand-block .brand-option {
+    margin-top: 0.75rem;
+    display: none;
+}
+.brand-block .brand-option[style*="block"] {
+    display: block;
+}
+
+.create-card {
+    border: 1px solid var(--color-border);
+}
+.create-card .page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.create-form-fields .form-control,
+.create-form-fields .form-select {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+.create-form-fields .form-control:focus,
+.create-form-fields .form-select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+}
+.create-form-fields .form-check-input {
+    border-color: var(--color-border);
+}
+.create-form-fields .form-check-input:checked {
+    background-color: var(--color-accent);
+    border-color: var(--color-accent);
+}
+.create-form-fields .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: #dc3545;
+}
+.create-form-fields .form-text {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+.create-card .btn-shop-primary {
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+}
+.create-card .btn-shop-primary:hover {
+    background: var(--color-accent-hover);
+    color: #fff;
+}

@@ -1,0 +1,78 @@
+{% extends 'shop/seller_layout.html' %}
+{% load static %}
+
+{% block title %}Чат — Shop{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/chat/chat.css' %}">
+{% endblock %}
+
+{% block seller_content %}
+<div class="chat-page">
+    <div class="chat-container">
+        <div class="chat-window">
+            <div class="chat-header">
+                <a href="{% url 'chat_list' %}" class="chat-back"><i class="bi bi-arrow-left"></i> Чаты</a>
+                <div class="chat-header-info">
+                    <div class="chat-header-avatar">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div>
+                        <div class="chat-header-name">
+                            {% if chat.other_user %}{{ chat.other_user.username }}{% else %}Чат{% endif %}
+                        </div>
+                        {% if chat.product %}
+                        <a href="{% url 'product_detail' pk=chat.product.id %}" class="chat-header-product">{{ chat.product.name }}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                {% for msg in chat.messages.all %}
+                <div class="chat-msg-wrap {% if msg.sender == request.user %}own{% else %}other{% endif %}">
+                    {% if msg.sender == request.user %}
+                    <div class="chat-msg-actions dropdown">
+                        <button type="button" class="chat-msg-more" data-bs-toggle="dropdown" aria-label="Ещё"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'message_edit' pk=msg.id %}">Редактировать</a></li>
+                            <li>
+                                <form method="post" action="{% url 'message_delete' pk=msg.id %}" onsubmit="return confirm('Удалить сообщение?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">Удалить</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="chat-msg {% if msg.sender != request.user and chat.product and chat.product.seller_id == msg.sender_id %}chat-msg-from-seller{% endif %}" data-msg-id="{{ msg.id }}">
+                        {% if msg.sender != request.user and chat.product and chat.product.seller_id == msg.sender_id %}
+                        <div class="chat-msg-seller-label"><i class="bi bi-shop"></i> Продавец</div>
+                        {% endif %}
+                        <div class="chat-msg-text">{{ msg.text }}</div>
+                        <div class="chat-msg-meta">
+                            <small>{{ msg.created_at|date:"H:i" }}</small>
+                            {% if msg.edited_at %}<small class="chat-msg-edited">изм.</small>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="chat-empty">Начните переписку</div>
+                {% endfor %}
+            </div>
+
+            <form method="post" class="chat-input-form">
+                {% csrf_token %}
+                <input type="text" name="text" class="form-control chat-input" placeholder="Написать сообщение..." required autocomplete="off">
+                <button type="submit" class="btn btn-chat-send"><i class="bi bi-send-fill"></i></button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="{% static 'js/chat/chat.js' %}"></script>
+{% endblock %}

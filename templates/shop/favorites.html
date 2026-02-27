@@ -1,0 +1,82 @@
+{% extends 'shop/base.html' %}
+{% load static shop_extras %}
+
+{% block title %}Избранное{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/favorites.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 px-3 px-md-4">
+    <h2 class="page-title mb-4" data-i18n="favorites_title">Избранное</h2>
+    {% if page_obj.object_list %}
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-3 row-cols-lg-4 g-2 g-md-3">
+        {% for product in page_obj %}
+        <div class="col">
+            <div class="fav-card">
+                <a href="{% url 'product_detail' pk=product.id %}">
+                    <div class="fav-card-brand">{{ product.brand.name }}</div>
+                    <div class="img-wrap">
+                        <img src="{% product_image_src product %}" alt="{{ product.name }}">
+                    </div>
+                    <div class="card-body">
+                        {% if product.model %}<div class="fav-card-model">{{ product.model }}</div>{% endif %}
+                        <div class="fw-medium">{{ product.name }}</div>
+                        {% if product.price %}<div class="fw-bold mt-1 text-price">{{ product.price }} ₽</div>{% endif %}
+                        <div class="product-card-stats mt-1 pt-1">
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'like_toggle' pk=product.id %}?next={% url 'favorites' %}" class="product-stat like-btn {% if product.id in liked_ids %}liked{% endif %}" data-like-toggle data-product-id="{{ product.id }}" title="Нравится">
+                                <i class="bi bi-heart{% if product.id in liked_ids %}-fill{% endif %}"></i>
+                                <span class="product-stat-count">{{ product.likes_count|default:0 }}</span>
+                            </a>
+                            {% else %}
+                            <span class="product-stat"><i class="bi bi-heart"></i><span class="product-stat-count">{{ product.likes_count|default:0 }}</span></span>
+                            {% endif %}
+                            <a href="{% url 'product_detail' pk=product.id %}#comments" class="product-stat" title="Комментарии">
+                                <i class="bi bi-chat"></i>
+                                <span class="product-stat-count">{{ product.comments_count|default:0 }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </a>
+                <div class="card-footer bg-transparent border-top px-3 py-2">
+                    <a href="{% url 'remove_from_favorites' pk=product.id %}?next={% url 'favorites' %}" class="btn btn-outline-danger btn-sm w-100">
+                        <i class="bi bi-heart-fill me-1"></i>Убрать
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="mt-4 d-flex justify-content-center">
+        <ul class="pagination pagination-sm mb-0">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">←</a></li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">→</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="empty-state card-shop">
+        <div class="p-5">
+            <div class="icon mb-3"><i class="bi bi-heart"></i></div>
+            <h5 class="mb-2" data-i18n="favorites_empty">В избранном пока ничего нет</h5>
+            <p class="text-muted mb-4">Добавляйте понравившиеся товары, нажимая на сердечко</p>
+            <a href="{% url 'home' %}" class="btn btn-shop-primary" data-i18n="go_catalog">Перейти в каталог</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

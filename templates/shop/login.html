@@ -1,0 +1,62 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Вход — Shop{% endblock %}
+
+{% block search_bar %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-blob-2"></div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <a href="{% url 'home' %}">SHOP</a>
+            </div>
+            <h1>Вход</h1>
+            <p class="auth-subtitle">Войдите в аккаунт, чтобы писать в чатах и сохранять избранное</p>
+
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
+
+                <div class="mb-3 form-group">
+                    <label for="id_username" class="form-label">Логин</label>
+                    <input type="text" name="username" id="id_username" class="form-control" placeholder="Введите логин" required autofocus>
+                </div>
+                <div class="mb-3 form-group">
+                    <label for="id_password" class="form-label">Пароль</label>
+                    <div class="input-group-password">
+                        <input type="password" name="password" id="id_password" class="form-control" placeholder="Введите пароль" required>
+                        <button type="button" class="btn-password-toggle" aria-label="Показать пароль" data-target="id_password">
+                            <i class="bi bi-eye"></i><i class="bi bi-eye-slash d-none"></i>
+                        </button>
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger py-3 mb-3">
+                    <i class="bi bi-exclamation-circle me-2"></i>{{ form.non_field_errors.0 }}
+                </div>
+                {% endif %}
+
+                <button type="submit" class="btn btn-auth">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                </button>
+            </form>
+
+            <div class="auth-switch">
+                Нет аккаунта? <a href="{% url 'register' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">Зарегистрироваться</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/auth/auth.js' %}"></script>
+{% endblock %}

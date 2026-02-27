@@ -1,0 +1,174 @@
+{% extends 'shop/base.html' %}
+{% load static shop_extras %}
+
+{% block title %}{{ product.name }} — {{ product.brand.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages/product.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-3 py-md-4 px-3 px-md-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-shop mb-3">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'home_by_category' category_id=product.category.id %}">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-5">
+            <div class="product-detail-img">
+                <img src="{% product_image_src product %}" alt="{{ product.name }}">
+            </div>
+        </div>
+        <div class="col-12 col-lg-7">
+            <div class="product-info-card h-100">
+                <div class="d-flex gap-2 mb-2">
+                    {% if product.is_new %}<span class="badge bg-success product-badge">Новинка</span>{% endif %}
+                    {% if product.is_vip %}<span class="badge bg-warning text-dark product-badge">VIP</span>{% endif %}
+                </div>
+                <p class="text-uppercase small fw-semibold mb-1 brand-label">{{ product.brand.name }}{% if product.seller and product.seller.profile.company_name %} · {{ product.seller.profile.company_name }}{% endif %}</p>
+                {% if product.model %}<p class="text-muted small mb-1 product-model">Модель: {{ product.model }}</p>{% endif %}
+                <h1 class="product-title mb-2">{{ product.name }}</h1>
+                <p class="text-muted small mb-3">{{ product.category.name }}</p>
+                {% if product.price %}
+                <p class="product-price mb-4">{{ product.price }} ₽</p>
+                {% endif %}
+                {% if product.description %}
+                <hr class="my-4">
+                <h6 class="fw-semibold mb-2">Описание</h6>
+                <p class="product-desc">{{ product.description }}</p>
+                {% endif %}
+                <hr class="my-4">
+                <div class="product-actions d-flex flex-wrap gap-2 pt-2">
+                    <a href="{% url 'home' %}" class="btn btn-outline-secondary">← Назад</a>
+                    {% if user.is_authenticated and product.seller and product.seller != user %}
+                    {% if is_following_seller %}
+                    <a href="{% url 'unfollow_seller' pk=product.seller.id %}?next={% url 'product_detail' pk=product.id %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-person-check me-1"></i>Отписаться от продавца
+                    </a>
+                    {% else %}
+                    <a href="{% url 'follow_seller' pk=product.seller.id %}?next={% url 'product_detail' pk=product.id %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-person-plus me-1"></i>Следить за продавцом
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'chat_start_product' pk=product.id %}" class="btn btn-shop-primary">
+                        <i class="bi bi-chat-dots me-1"></i>Написать
+                    </a>
+                    {% else %}
+                    <a href="{% url 'login' %}?next={% url 'chat_start_product' pk=product.id %}" class="btn btn-shop-primary">
+                        <i class="bi bi-chat-dots me-1"></i>Войти чтобы написать
+                    </a>
+                    {% endif %}
+                    {% if user.is_authenticated %}
+                    <span data-fav-buttons>
+                    {% if is_in_favorites %}
+                    <a href="{% url 'remove_from_favorites' pk=product.id %}?next={% url 'product_detail' pk=product.id %}" class="btn btn-outline-danger" data-fav-toggle>
+                        <i class="bi bi-heart-fill me-1"></i>Убрать из избранного
+                    </a>
+                    {% else %}
+                    <a href="{% url 'add_to_favorites' pk=product.id %}?next={% url 'product_detail' pk=product.id %}" class="btn btn-outline-secondary" data-fav-toggle>
+                        <i class="bi bi-heart me-1"></i>В избранное
+                    </a>
+                    {% endif %}
+                    </span>
+                    {% else %}
+                    <a href="{% url 'login' %}?next={% url 'product_detail' pk=product.id %}" class="btn btn-outline-secondary">Войти чтобы добавить в избранное</a>
+                    {% endif %}
+                </div>
+                <div class="product-detail-stats mt-3 pt-3 border-top">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'like_toggle' pk=product.id %}?next={% url 'product_detail' pk=product.id %}" class="product-stat like-btn {% if is_liked %}liked{% endif %}" data-like-toggle data-product-id="{{ product.id }}">
+                        <i class="bi bi-heart{% if is_liked %}-fill{% endif %}"></i>
+                        <span class="product-stat-count">{{ product.likes_count|default:0 }}</span>
+                    </a>
+                    {% else %}
+                    <span class="product-stat">
+                        <i class="bi bi-heart"></i>
+                        <span class="product-stat-count">{{ product.likes_count|default:0 }}</span>
+                    </span>
+                    {% endif %}
+                    <span class="product-stat">
+                        <i class="bi bi-chat"></i>
+                        <span class="product-stat-count">{{ product.comments_count|default:0 }}</span>
+                    </span>
+                </div>
+                <div id="comments" class="product-comments mt-4">
+                    <h6 class="fw-semibold mb-3">Комментарии ({{ product.comments_count|default:0 }})</h6>
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'add_comment' pk=product.id %}" class="mb-4">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" name="text" class="form-control" placeholder="Написать комментарий..." maxlength="1000" required>
+                            <button type="submit" class="btn btn-shop-primary">Отправить</button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <p class="text-muted small mb-4"><a href="{% url 'login' %}?next={% url 'product_detail' pk=product.id %}#comments">Войдите</a>, чтобы оставить комментарий</p>
+                    {% endif %}
+                    <div class="comment-list">
+                        {% for c in comments %}
+                        <div class="comment-item" data-comment-id="{{ c.id }}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="comment-author">{{ c.user.username }}</div>
+                                    <div class="comment-text">{{ c.text }}</div>
+                                    <div class="comment-date">{{ c.created_at|date:"d.m.Y H:i" }}{% if c.edited_at %} <small class="text-muted">(изм.)</small>{% endif %}</div>
+                                </div>
+                                {% if user == c.user %}
+                                <div class="comment-actions">
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-muted comment-edit-btn">Редактировать</button>
+                                    <form class="d-inline" method="post" action="{% url 'comment_delete' pk=c.id %}" onsubmit="return confirm('Удалить комментарий?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-link btn-sm p-0 text-danger">Удалить</button>
+                                    </form>
+                                    <form class="comment-edit-form d-none" method="post" action="{% url 'comment_edit' pk=c.id %}">
+                                        {% csrf_token %}
+                                        <div class="d-flex gap-1 mt-1">
+                                            <input type="text" name="text" class="form-control form-control-sm comment-edit-input" value="{{ c.text }}" maxlength="1000" required>
+                                            <button type="submit" class="btn btn-shop-primary btn-sm">OK</button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm comment-cancel-btn">Отмена</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted small">Пока нет комментариев</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.comment-edit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const item = this.closest('.comment-item');
+        const content = item.querySelector('.comment-author').closest('div');
+        const form = item.querySelector('.comment-edit-form');
+        content.classList.add('d-none');
+        this.classList.add('d-none');
+        form.classList.remove('d-none');
+    });
+});
+document.querySelectorAll('.comment-cancel-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const form = this.closest('.comment-edit-form');
+        const item = form.closest('.comment-item');
+        const content = item.querySelector('.comment-author').closest('div');
+        content.classList.remove('d-none');
+        item.querySelector('.comment-edit-btn').classList.remove('d-none');
+        form.classList.add('d-none');
+    });
+});
+</script>
+{% endblock %}

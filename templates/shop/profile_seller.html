@@ -1,0 +1,54 @@
+{% extends 'shop/seller_layout.html' %}
+{% load static %}
+
+{% block title %}Мой аккаунт — Shop{% endblock %}
+
+{% block seller_content %}
+<div class="profile-seller-page">
+    <div class="profile-header-card mb-4">
+        <div class="profile-avatar"><i class="bi bi-person-circle"></i></div>
+        <div>
+            <h2 class="mb-1">{{ user.username }}</h2>
+            <span class="text-muted">{{ profile.get_role_display }}{% if profile.company_name %} · {{ profile.company_name }}{% endif %}</span>
+        </div>
+    </div>
+
+    <div class="profile-stats-row mb-4">
+        <a href="{% url 'favorites' %}" class="profile-stat-box">
+            <i class="bi bi-heart"></i>
+            <span class="stat-num">{{ favorites_count|default:0 }}</span>
+            <span class="stat-label">Избранное</span>
+        </a>
+        <a href="{% url 'seller_products' %}" class="profile-stat-box">
+            <i class="bi bi-box-seam"></i>
+            <span class="stat-num">{{ products_count|default:0 }}</span>
+            <span class="stat-label">Мои товары</span>
+        </a>
+        <a href="{% url 'chat_list' %}" class="profile-stat-box">
+            <i class="bi bi-chat-text"></i>
+            <span class="stat-num">—</span>
+            <span class="stat-label">Чаты</span>
+        </a>
+    </div>
+
+    <div class="card p-4 mb-4">
+        <h5 class="mb-3"><i class="bi bi-person me-2"></i>Данные аккаунта</h5>
+        <dl class="row mb-0">
+            <dt class="col-sm-4 text-muted">Email</dt>
+            <dd class="col-sm-8">{{ user.email|default:"Не указан" }}</dd>
+            {% if profile.company_name %}
+            <dt class="col-sm-4 text-muted">Компания / магазин</dt>
+            <dd class="col-sm-8">{{ profile.company_name }}</dd>
+            {% endif %}
+            {% if profile.phone %}
+            <dt class="col-sm-4 text-muted">Телефон</dt>
+            <dd class="col-sm-8">{{ profile.phone }}</dd>
+            {% endif %}
+        </dl>
+        <div class="mt-4 pt-3 border-top">
+            <a href="{% url 'seller_brand' %}" class="btn btn-shop-primary me-2"><i class="bi bi-pencil me-1"></i>Редактировать магазин и бренды</a>
+            <a href="{% url 'seller_dashboard' %}" class="btn btn-outline-secondary">В кабинет</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

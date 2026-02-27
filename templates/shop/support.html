@@ -1,0 +1,33 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Поддержка — Shop{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-blob-2"></div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <a href="{% url 'home' %}">SHOP</a>
+            </div>
+            <h1>Поддержка</h1>
+            <p class="auth-subtitle">Свяжитесь с нами, если возникли вопросы</p>
+
+            <div class="profile-info">
+                <p><i class="bi bi-envelope me-2"></i>Email: support@shop.example.com</p>
+                <p><i class="bi bi-telegram me-2"></i>Telegram: @shop_support</p>
+                <p class="text-muted small mt-3">Мы отвечаем в течение 24 часов.</p>
+            </div>
+
+            <div class="auth-switch mt-3">
+                <a href="{% url 'home' %}">← На главную</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

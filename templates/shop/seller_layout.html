@@ -1,0 +1,58 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block search_bar %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/seller/seller.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="seller-layout-wrap">
+    <nav class="seller-mobile-nav">
+        <a href="{% url 'seller_dashboard' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'seller_dashboard' %}active{% endif %}"><i class="bi bi-graph-up"></i><span>Статистика</span></a>
+        <a href="{% url 'seller_products' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'seller_products' %}active{% endif %}"><i class="bi bi-box-seam"></i><span>Товары</span></a>
+        <a href="{% url 'seller_brand' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'seller_brand' %}active{% endif %}"><i class="bi bi-shop"></i><span>Магазин</span></a>
+        <a href="{% url 'profile' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'profile' %}active{% endif %}"><i class="bi bi-person-circle"></i><span>Аккаунт</span></a>
+        <a href="{% url 'chat_list' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'chat_list' or request.resolver_match.url_name == 'chat_detail' %}active{% endif %}"><i class="bi bi-chat-text"></i><span>Чаты</span></a>
+    </nav>
+    <div class="seller-layout">
+    <aside class="seller-sidebar">
+        <div class="seller-sidebar-header">
+            <i class="bi bi-shop"></i>
+            <span>Кабинет продавца</span>
+        </div>
+        <nav class="seller-sidebar-nav">
+            <a href="{% url 'seller_dashboard' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'seller_dashboard' %}active{% endif %}">
+                <i class="bi bi-graph-up"></i>
+                <span>Статистика</span>
+            </a>
+            <a href="{% url 'seller_products' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'seller_products' %}active{% endif %}">
+                <i class="bi bi-box-seam"></i>
+                <span>Мои товары</span>
+            </a>
+            <a href="{% url 'seller_brand' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'seller_brand' %}active{% endif %}">
+                <i class="bi bi-shop"></i>
+                <span>Магазин и бренды</span>
+            </a>
+            <a href="{% url 'profile' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <i class="bi bi-person-circle"></i>
+                <span>Мой аккаунт</span>
+            </a>
+            <a href="{% url 'chat_list' %}" class="seller-nav-btn {% if request.resolver_match.url_name == 'chat_list' or request.resolver_match.url_name == 'chat_detail' %}active{% endif %}">
+                <i class="bi bi-chat-text"></i>
+                <span>Чаты</span>
+            </a>
+        </nav>
+        <div class="seller-sidebar-footer">
+            <a href="{% url 'create_listing' %}" class="btn btn-shop-primary w-100">
+                <i class="bi bi-plus-circle me-1"></i>Подать объявление
+            </a>
+        </div>
+    </aside>
+    <main class="seller-main">
+        {% block seller_content %}{% endblock %}
+    </main>
+    </div>
+</div>
+{% endblock %}

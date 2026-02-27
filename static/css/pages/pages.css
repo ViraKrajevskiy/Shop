@@ -1,0 +1,7 @@
+/* Create listing & other simple pages */
+.create-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-md);
+}

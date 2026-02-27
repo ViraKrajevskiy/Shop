@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <script>
+        (function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
+    </script>
+    <title>{% block title %}Shop{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/layout/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/layout/mobile.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-shop">
+        <div class="container">
+            <a class="navbar-brand" href="{% if is_businessman %}{% url 'seller_dashboard' %}{% else %}{% url 'home' %}{% endif %}">SHOP</a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-label="Меню">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <div class="d-flex align-items-center gap-1 gap-md-2 nav-actions ms-lg-auto flex-wrap justify-content-center justify-content-lg-end">
+                    {% if is_businessman %}
+                    <a class="nav-btn d-none d-md-inline-flex" href="{% url 'seller_dashboard' %}" title="Кабинет продавца">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Кабинет</span>
+                    </a>
+                    <a class="nav-btn nav-btn-primary d-none d-md-inline-flex" href="{% url 'create_listing' %}">
+                        <i class="bi bi-plus-circle"></i>
+                        <span data-i18n="post_ad">Подать объявление</span>
+                    </a>
+                    {% else %}
+                    <a class="nav-btn nav-btn-primary d-none d-md-inline-flex" href="{% url 'become_seller' %}">
+                        <i class="bi bi-shop"></i>
+                        <span>Стать продавцом</span>
+                    </a>
+                    {% endif %}
+                    <button class="theme-toggle nav-icon-btn ms-0" type="button" title="Светлая/тёмная тема" aria-label="Тема">
+                        <i class="bi bi-sun"></i>
+                        <i class="bi bi-moon-stars"></i>
+                    </button>
+                    <div class="dropdown nav-lang-dropdown">
+                        <button class="nav-btn nav-lang-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <span id="langLabel">RU</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+                            <li><a class="dropdown-item lang-opt" href="#" data-lang="ru">Русский</a></li>
+                            <li><a class="dropdown-item lang-opt" href="#" data-lang="en">English</a></li>
+                        </ul>
+                    </div>
+                    {% if user.is_authenticated %}
+                    <div class="nav-icons-group">
+                        <a class="nav-icon-btn notifications-btn" href="{% url 'notifications_list' %}" title="Уведомления">
+                            <i class="bi bi-bell"></i>
+                            {% if notifications_count %}<span class="favorites-badge notifications-badge">{{ notifications_count }}</span>{% endif %}
+                        </a>
+                        <a class="nav-icon-btn" href="{% url 'chat_list' %}" title="Чаты"><i class="bi bi-chat-text"></i></a>
+                        <a class="nav-icon-btn favorites-btn" href="{% url 'favorites' %}" title="Избранное">
+                            <i class="bi bi-heart"></i>
+                            {% if favorites_count %}<span class="favorites-badge">{{ favorites_count }}</span>{% endif %}
+                        </a>
+                    </div>
+                    <div class="dropdown nav-user-dropdown">
+                        <button class="nav-btn nav-user-dropdown-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            <span class="nav-user-name">{{ user.username }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark nav-user-menu">
+                            <li class="nav-user-menu-header">
+                                <div class="nav-user-avatar"><i class="bi bi-person-circle"></i></div>
+                                <span class="nav-user-username">{{ user.username }}</span>
+                            </li>
+                            <li><a class="dropdown-item nav-user-menu-item" href="{% url 'profile' %}"><i class="bi bi-person"></i><span data-i18n="profile">Профиль</span></a></li>
+                            {% if is_businessman %}
+                            <li><a class="dropdown-item nav-user-menu-item" href="{% url 'seller_dashboard' %}"><i class="bi bi-graph-up"></i><span>Кабинет продавца</span></a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item nav-user-menu-item" href="{% url 'notifications_list' %}"><i class="bi bi-bell"></i><span data-i18n="notifications">Уведомления</span></a></li>
+                            <li><a class="dropdown-item nav-user-menu-item" href="{% url 'chat_list' %}"><i class="bi bi-chat-text"></i><span data-i18n="chats">Чаты</span></a></li>
+                            <li>
+                                <a class="dropdown-item nav-user-menu-item favorites-btn" href="{% url 'favorites' %}">
+                                    <i class="bi bi-heart"></i><span data-i18n="favorites_title">Избранное</span>
+                                    {% if favorites_count %}<span class="favorites-badge">{{ favorites_count }}</span>{% endif %}
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item nav-user-menu-item" href="{% url 'support' %}"><i class="bi bi-headset"></i><span data-i18n="support">Поддержка</span></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item nav-user-menu-item nav-user-logout" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i><span data-i18n="logout">Выйти</span></a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a class="nav-btn" href="{% url 'register' %}"><i class="bi bi-person-plus"></i><span>Регистрация</span></a>
+                    <a class="nav-btn" href="{% url 'login' %}"><i class="bi bi-person"></i><span data-i18n="login">Войти</span></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="messages-wrap container py-2">
+        {% for message in messages %}
+        <div class="alert alert-dismissible fade show {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} mb-0" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block search_bar %}
+    <div class="search-bar-wrap">
+        <form class="search-bar-form" action="{% url 'home' %}" method="get">
+            <input class="form-control" type="search" name="q" placeholder="Поиск по товарам и брендам..." value="{{ request.GET.q|default:'' }}" aria-label="Поиск">
+            <button class="btn btn-search-bar" type="submit"><i class="bi bi-search"></i><span>Найти</span></button>
+        </form>
+    </div>
+    {% endblock %}
+
+    <main class="page-content">
+    {% block content %}{% endblock %}
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/core/base.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
