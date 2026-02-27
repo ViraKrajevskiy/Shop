@@ -37,13 +37,13 @@
 
 Либо в Render Dashboard свяжите Web Service с PostgreSQL — переменная подтянется автоматически.
 
-## Суперпользователь
+## Суперпользователь (без терминала)
 
-После деплоя: Dashboard → Shell → выполнить:
+При первом деплое миграция автоматически создаёт:
+- **Логин:** admin
+- **Пароль:** admin123
 
-```
-python manage.py createsuperuser
-```
+Войдите в `/admin/` и смените пароль (Account → Change password).
 
 ## Ошибка `no such table: shop_product`
 
