@@ -10,11 +10,16 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
-
 if config('RENDER', default=False, cast=bool):
     host = os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')
     if host:
         ALLOWED_HOSTS.append(host.split('://')[-1].split('/')[0])
+    # Домен 101-school.uz — по умолчанию добавлен; можно переопределить через ALLOWED_HOSTS_EXTRA
+    _extra = config('ALLOWED_HOSTS_EXTRA', default='101-school.uz,www.101-school.uz', cast=Csv())
+    for h in _extra:
+        h = (h or '').strip()
+        if h and h not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(h)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -66,7 +71,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 if config('DATABASE_URL', default=''):
     import dj_database_url
     DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
@@ -86,21 +90,18 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'ru-ru'
-
 TIME_ZONE = 'Europe/Moscow'
-
 USE_I18N = True
-
 USE_TZ = True
-
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
 try:
     import whitenoise  # noqa: F401
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 except ImportError:
-    pass  # по умолчанию Django использует StaticFilesStorage
+    pass 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -112,7 +113,6 @@ LOGIN_REDIRECT_URL = '/'
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 LOGOUT_REDIRECT_URL = '/'
 
-
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -123,5 +123,5 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    _origins = config('CSRF_TRUSTED_ORIGINS', default='')
+    _origins = config('CSRF_TRUSTED_ORIGINS', default='https://101-school.uz,https://www.101-school.uz')
     CSRF_TRUSTED_ORIGINS = [o.strip() for o in _origins.split(',') if o.strip()]

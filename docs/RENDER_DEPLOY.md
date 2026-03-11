@@ -1,77 +1,82 @@
-# Деплой на Render.com
+# Деплой на Render.com (101-school.uz)
 
-## Быстрый старт
+## 1. Подключение репозитория из GitHub
 
-1. **Репозиторий**: Залейте проект в GitHub/GitLab и подключите к Render.
-2. **PostgreSQL**: В Render Dashboard → Databases → Create PostgreSQL. Скопируйте Internal Database URL.
-3. **Web Service**: New → Web Service, выберите репозиторий.
+1. Зайдите на [dashboard.render.com](https://dashboard.render.com).
+2. **New** → **Web Service**.
+3. В разделе **Connect a repository** нажмите **Connect account** для GitHub (если ещё не подключён) и выберите репозиторий с проектом Shop.
+4. Подключите репозиторий — Render будет подтягивать код из GitHub при каждом пуше (автодеплой).
 
-## Настройки Web Service
+## 2. База данных PostgreSQL
+
+1. В Render: **New** → **PostgreSQL** (или в боковом меню **Databases**).
+2. Создайте БД (plan Free при необходимости).
+3. В карточке БД скопируйте **Internal Database URL** — он понадобится для переменной `DATABASE_URL`.
+
+## 3. Настройки Web Service
 
 | Параметр | Значение |
 |----------|----------|
-| **Build Command** | `./build.sh` |
-| **Release Command** | `python manage.py migrate --noinput` |
-| **Start Command** | `python manage.py migrate --noinput && gunicorn config.wsgi:application` |
+| **Name** | например `shop` или `101-school` |
+| **Region** | ближайший к пользователям |
+| **Branch** | `main` (или ваша ветка для деплоя) |
+| **Root Directory** | оставить пустым |
 | **Runtime** | Python 3 |
+| **Build Command** | `./build.sh` |
+| **Start Command** | `python manage.py migrate --noinput && gunicorn config.wsgi:application` |
 
-> ⚠️ **Build Command** обязательно `./build.sh` — иначе не выполняются collectstatic и migrate.
+> **Release Command** (если есть): `python manage.py migrate --noinput`
 
-## Переменные окружения (Environment Variables)
+## 4. Переменные окружения (Environment)
 
-| Переменная | Обязательно | Описание |
-|------------|-------------|----------|
-| `SECRET_KEY` | Да | Сгенерировать: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
-| `DEBUG` | Да | `False` |
-| `DATABASE_URL` | Да | Internal Database URL от PostgreSQL (Render подставит автоматически при связке) |
-| `RENDER` | Да | `True` (Render сам добавит хост в ALLOWED_HOSTS) |
-| `ALLOWED_HOSTS` | Опционально | `your-app.onrender.com` (или домен) |
-| `SECURE_SSL_REDIRECT` | Опционально | `True` |
-| `CSRF_TRUSTED_ORIGINS` | Опционально | `https://your-app.onrender.com` |
+В Web Service → **Environment** добавьте:
 
-## Связка с PostgreSQL
+| Key | Value |
+|-----|--------|
+| `PYTHON_VERSION` | `3.11.0` |
+| `SECRET_KEY` | сгенерировать: `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"` |
+| `DEBUG` | `False` |
+| `RENDER` | `True` |
+| `DATABASE_URL` | Internal Database URL от вашей PostgreSQL (или связать сервис с БД в Render) |
+| `ALLOWED_HOSTS_EXTRA` | `101-school.uz,www.101-school.uz` (уже есть по умолчанию в коде, можно не задавать) |
+| `CSRF_TRUSTED_ORIGINS` | `https://101-school.uz,https://www.101-school.uz` |
+| `SECURE_SSL_REDIRECT` | `True` (рекомендуется при работе по HTTPS) |
 
-1. В Web Service → Environment → Add Environment Variable
-2. Key: `DATABASE_URL`
-3. Value: выберите из Related Services → ваш PostgreSQL → Internal Database URL
+Связка с PostgreSQL: в том же разделе Environment можно выбрать **Add Environment Variable** → **Add from Render** и привязать `DATABASE_URL` к созданной БД.
 
-Либо в Render Dashboard свяжите Web Service с PostgreSQL — переменная подтянется автоматически.
+## 5. Кастомный домен 101-school.uz
 
-## Суперпользователь (без терминала)
+1. В карточке Web Service откройте **Settings** → **Custom Domains**.
+2. **Add Custom Domain** → введите `101-school.uz`.
+3. При необходимости добавьте `www.101-school.uz`.
+4. Render покажет CNAME-записи (или A-запись). В панели управления доменом (где куплен 101-school.uz) создайте указанные записи.
+5. После проверки DNS Render выдаст сертификат SSL — сайт будет открываться по `https://101-school.uz`.
 
-При первом деплое миграция автоматически создаёт:
-- **Логин:** admin
-- **Пароль:** admin123
+Хосты `101-school.uz` и `www.101-school.uz` уже добавлены в проект через `ALLOWED_HOSTS_EXTRA` и `CSRF_TRUSTED_ORIGINS` по умолчанию.
 
-Войдите в `/admin/` и смените пароль (Account → Change password).
+## 6. Деплой
 
-## Ошибка `no such table: shop_product`
+- После сохранения сервиса Render выполнит первый деплой из GitHub.
+- Дальше каждый **push в выбранную ветку** будет запускать новый деплой (если включён Auto-Deploy).
 
-В Render Dashboard → ваш сервис shop → **Settings** → **Start Command** замените на:
+## 7. Суперпользователь
 
-```
-python manage.py migrate --noinput && gunicorn config.wsgi:application
-```
+После первого успешного деплоя зайдите на `https://101-school.uz/admin/` (или ваш *.onrender.com URL). Если в проекте есть миграция/команда, создающая суперпользователя (логин/пароль admin) — войдите и смените пароль в разделе аккаунта.
 
-Миграции выполнятся при каждом запуске — таблицы создадутся. Затем **Manual Deploy**.
+## 8. Медиафайлы
 
-> Опционально: PostgreSQL + `DATABASE_URL` — без них SQLite теряет данные при редеплое.
+Диск на Render эфемерный — загруженные изображения пропадают при редеплое. Для продакшена лучше настроить внешнее хранилище, например:
 
-## Outbound IP (для whitelist)
+- [django-storages](https://django-storages.readthedocs.io/) + S3 или совместимое хранилище
+- [Cloudinary](https://cloudinary.com/) для картинок
 
-Запросы к внешним API идут с IP Render. Для настройки whitelist в платёжных системах, базах и т.п.:
+## 9. Ошибка «no such table»
 
-| Диапазон | CIDR |
-|----------|------|
-| 74.220.48.0/24 | 74.220.48.0–74.220.48.255 |
-| 74.220.56.0/24 | 74.220.56.0–74.220.56.255 |
+Если при открытии сайта появляется ошибка про отсутствующие таблицы:
 
-> Сервис: https://shop-v82z.onrender.com/
+1. Убедитесь, что в **Start Command** есть: `python manage.py migrate --noinput && gunicorn config.wsgi:application`.
+2. Выполните **Manual Deploy** в Render (Deploy → Deploy latest commit).
 
-## Медиафайлы
+## 10. Blueprint (render.yaml)
 
-Диск на Render **эфемерный** — загруженные изображения товаров теряются при каждом редеплое.
-
-Для продакшена рекомендуется:
-- [AWS S3](https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html) + django-storages
-- [Cloudinary](https://cloudinary.com/) для изображений
+В корне проекта есть `render.yaml` — при создании сервиса через **New** → **Blueprint** Render может подхватить репозиторий и часть настроек из этого файла. Домен и часть переменных (например, `CSRF_TRUSTED_ORIGINS`) после создания сервиса лучше проверить и при необходимости добавить вручную в Environment и Custom Domains.
