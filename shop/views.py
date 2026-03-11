@@ -104,7 +104,7 @@ def _catalog_view(request, category_id=None):
                 seller_id__in=seller_ids
             ).values_list('seller_id', flat=True))
 
-    return render(request, 'shop/home.html', {
+    return render(request, 'shop/pages/home.html', {
         'page_obj': page_obj,
         'categories': categories,
         'brands': brands,
@@ -152,7 +152,7 @@ def product_detail(request, pk):
         SellerFollow.objects.filter(user=request.user, seller_id=product.seller_id).exists()
     )
     comments = product.comments.select_related('user').order_by('-created_at')[:20]
-    return render(request, 'shop/product_detail.html', {
+    return render(request, 'shop/pages/product_detail.html', {
         'product': product,
         'is_in_favorites': is_in_favorites,
         'is_liked': is_liked,
@@ -253,7 +253,7 @@ def favorites_list(request):
             user=request.user,
             product_id__in=[p.id for p in page_obj]
         ).values_list('product_id', flat=True))
-    return render(request, 'shop/favorites.html', {
+    return render(request, 'shop/pages/favorites.html', {
         'page_obj': page_obj,
         'favorites_ids': favorites,
         'liked_ids': liked_ids,
@@ -269,7 +269,7 @@ def become_seller(request):
         return redirect('create_listing')
     pending = SellerApplication.objects.filter(user=request.user, status=SellerApplication.STATUS_PENDING).first()
     if pending:
-        return render(request, 'shop/become_seller.html', {'form': None, 'pending_application': pending})
+        return render(request, 'shop/auth/become_seller.html', {'form': None, 'pending_application': pending})
     if request.method == 'POST':
         from .forms import BecomeSellerForm
         form = BecomeSellerForm(request.POST)
@@ -285,7 +285,7 @@ def become_seller(request):
     else:
         from .forms import BecomeSellerForm
         form = BecomeSellerForm()
-    return render(request, 'shop/become_seller.html', {'form': form})
+    return render(request, 'shop/auth/become_seller.html', {'form': form})
 
 
 def register_view(request):
@@ -304,7 +304,7 @@ def register_view(request):
     else:
         from .forms import RegisterForm
         form = RegisterForm()
-    return render(request, 'shop/register.html', {'form': form})
+    return render(request, 'shop/auth/register.html', {'form': form})
 
 
 @login_required
@@ -338,7 +338,7 @@ def create_listing(request):
         form = ProductForm(user=request.user)
 
     has_owned_brands = Brand.objects.filter(owner=request.user).exists()
-    return render(request, 'shop/create_listing.html', {'form': form, 'has_owned_brands': has_owned_brands})
+    return render(request, 'shop/seller/create_listing.html', {'form': form, 'has_owned_brands': has_owned_brands})
 
 
 @login_required
@@ -364,15 +364,13 @@ def seller_dashboard(request):
     total_comments = ProductComment.objects.filter(product__seller=request.user).count()
     total_favorites = UserFavorite.objects.filter(product__seller=request.user).count()
     followers_count = SellerFollow.objects.filter(seller=request.user).count()
-    chart_products = products_annotated[:10]
-    return render(request, 'shop/seller_dashboard.html', {
+    return render(request, 'shop/seller/seller_dashboard.html', {
         'stats': stats,
         'products': products_annotated[:5],
         'total_likes': total_likes,
         'total_comments': total_comments,
         'total_favorites': total_favorites,
         'followers_count': followers_count,
-        'chart_products': chart_products,
     })
 
 
@@ -390,7 +388,7 @@ def seller_products(request):
     ).select_related('brand', 'category').order_by('-created_at')
     paginator = Paginator(products, 15)
     page_obj = paginator.get_page(request.GET.get('page', 1))
-    return render(request, 'shop/seller_products.html', {'page_obj': page_obj})
+    return render(request, 'shop/seller/seller_products.html', {'page_obj': page_obj})
 
 
 @login_required
@@ -424,7 +422,7 @@ def seller_brand(request):
                 messages.success(request, 'Бренд удалён.')
         return redirect('seller_brand')
 
-    return render(request, 'shop/seller_brand.html', {
+    return render(request, 'shop/seller/seller_brand.html', {
         'profile': profile,
         'owned_brands': owned_brands,
     })
@@ -440,7 +438,7 @@ def chat_list(request):
         other = chat.participants.exclude(user=request.user).first()
         chat.other_user = other.user if other else None
     profile = getattr(request.user, 'profile', None)
-    template = 'shop/chat_list_seller.html' if profile and profile.is_businessman else 'shop/chat_list.html'
+    template = 'shop/seller/chat_list_seller.html' if profile and profile.is_businessman else 'shop/chat/chat_list.html'
     return render(request, template, {'chats': chats})
 
 
@@ -467,7 +465,7 @@ def chat_detail(request, pk):
     chat.other_user = other.user if other else None
     chat.messages.exclude(sender=request.user).update(is_read=True)
     profile = getattr(request.user, 'profile', None)
-    template = 'shop/chat_detail_seller.html' if profile and profile.is_businessman else 'shop/chat_detail.html'
+    template = 'shop/seller/chat_detail_seller.html' if profile and profile.is_businessman else 'shop/chat/chat_detail.html'
     return render(request, template, {'chat': chat})
 
 
@@ -485,7 +483,7 @@ def message_edit(request, pk):
             msg.edited_at = timezone.now()
             msg.save()
         return redirect('chat_detail', pk=msg.chat_id)
-    return render(request, 'shop/message_edit.html', {'msg': msg})
+    return render(request, 'shop/chat/message_edit.html', {'msg': msg})
 
 
 @login_required
@@ -545,7 +543,7 @@ def logout_view(request):
 def notifications_list(request):
     """Список уведомлений"""
     notifications = Notification.objects.filter(user=request.user).order_by('-created_at')[:50]
-    return render(request, 'shop/notifications.html', {'notifications': notifications})
+    return render(request, 'shop/pages/notifications.html', {'notifications': notifications})
 
 
 @login_required
@@ -588,7 +586,7 @@ def profile_view(request):
     if profile and profile.is_businessman:
         products_count = Product.objects.filter(seller=request.user).count()
 
-    template = 'shop/profile_seller.html' if profile and profile.is_businessman else 'shop/profile.html'
+    template = 'shop/seller/profile_seller.html' if profile and profile.is_businessman else 'shop/pages/profile.html'
     return render(request, template, {
         'profile': profile,
         'favorites_count': favorites_count,
@@ -599,4 +597,4 @@ def profile_view(request):
 
 def support_view(request):
     """Страница поддержки"""
-    return render(request, 'shop/support.html')
+    return render(request, 'shop/pages/support.html')

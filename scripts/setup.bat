@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0\.."
 if not exist .env (
     copy .env.example .env
     echo Created .env. Generate SECRET_KEY before production!

@@ -1,4 +1,4 @@
-{% extends 'shop/seller_layout.html' %}
+{% extends 'shop/seller/seller_layout.html' %}
 {% load static shop_extras %}
 
 {% block title %}Статистика — Shop{% endblock %}
@@ -47,15 +47,6 @@
         </div>
     </div>
 
-    {% if chart_products %}
-    <div class="mb-4">
-        <h3 class="h6 mb-2"><i class="bi bi-bar-chart me-1"></i>По товарам</h3>
-        <div class="chart-wrap">
-            <canvas id="statsChart" height="180"></canvas>
-        </div>
-    </div>
-    {% endif %}
-
     {% if products %}
     <div>
         <h3 class="h6 mb-2"><i class="bi bi-box-seam me-1"></i>Последние товары</h3>
@@ -80,31 +71,4 @@
     <a href="{% url 'create_listing' %}" class="btn btn-shop-primary mt-2">Добавить первый товар</a>
     {% endif %}
 </div>
-
-{% if chart_products %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-{% block extra_js %}
-{{ block.super }}
-<script>
-(function() {
-    const labels = [{% for p in chart_products %}'{{ p.name|escapejs|truncatewords:3 }}'{% if not forloop.last %}, {% endif %}{% endfor %}];
-    const likesData = [{% for p in chart_products %}{{ p.likes_count }}{% if not forloop.last %}, {% endif %}{% endfor %}];
-    const commentsData = [{% for p in chart_products %}{{ p.comments_count }}{% if not forloop.last %}, {% endif %}{% endfor %}];
-    const favoritesData = [{% for p in chart_products %}{{ p.favorites_count|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}];
-    new Chart(document.getElementById('statsChart'), {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                { label: 'Лайки', data: likesData, backgroundColor: 'rgba(239, 68, 68, 0.7)' },
-                { label: 'Комментарии', data: commentsData, backgroundColor: 'rgba(59, 130, 246, 0.7)' },
-                { label: 'В избранном', data: favoritesData, backgroundColor: 'rgba(34, 197, 94, 0.7)' }
-            ]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: false }, y: { beginAtZero: true } } }
-    });
-})();
-</script>
-{% endblock %}
-{% endif %}
 {% endblock %}

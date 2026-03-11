@@ -1,4 +1,8 @@
-# Setup for PowerShell
+# Setup for PowerShell — можно запускать из корня проекта или из scripts/
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ProjectRoot = Split-Path -Parent $ScriptDir
+Set-Location $ProjectRoot
+
 if (-not (Test-Path ".env")) {
     Copy-Item ".env.example" ".env"
     Write-Host "Created .env from .env.example. Generate SECRET_KEY and update .env before production!" -ForegroundColor Yellow

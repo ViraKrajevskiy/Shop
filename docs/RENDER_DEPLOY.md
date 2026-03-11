@@ -1,3 +1,7 @@
+# Деплой на Render.com
+
+## Быстрый старт
+
 1. **Репозиторий**: Залейте проект в GitHub/GitLab и подключите к Render.
 2. **PostgreSQL**: В Render Dashboard → Databases → Create PostgreSQL. Скопируйте Internal Database URL.
 3. **Web Service**: New → Web Service, выберите репозиторий.
@@ -62,6 +66,7 @@ python manage.py migrate --noinput && gunicorn config.wsgi:application
 | 74.220.48.0/24 | 74.220.48.0–74.220.48.255 |
 | 74.220.56.0/24 | 74.220.56.0–74.220.56.255 |
 
+> Сервис: https://shop-v82z.onrender.com/
 
 ## Медиафайлы
 

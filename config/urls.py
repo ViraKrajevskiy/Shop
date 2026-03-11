@@ -33,7 +33,7 @@ urlpatterns = [
     path('chats/message/<int:pk>/delete/', views.message_delete, name='message_delete'),
     path('chats/start/', views.chat_start, name='chat_start'),
     path('product/<int:pk>/chat/', views.chat_start_product, name='chat_start_product'),
-    path('login/', auth_views.LoginView.as_view(template_name='shop/login.html'), name='login'),
+    path('login/', auth_views.LoginView.as_view(template_name='shop/auth/login.html'), name='login'),
     path('register/', views.register_view, name='register'),
     path('become-seller/', views.become_seller, name='become_seller'),
     path('profile/', views.profile_view, name='profile'),

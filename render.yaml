@@ -1,5 +1,3 @@
-# Render Blueprint — https://render.com/docs/blueprint-spec
-# Развернуть: Dashboard → New → Blueprint → подключить репозиторий
 databases:
   - name: shop-db
     plan: free

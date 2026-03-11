@@ -33,10 +33,31 @@ js/
 
 ## Шаблоны (templates/shop/)
 
-- `base.html` — основной layout
-- `home.html` — главная / каталог
-- `product_detail.html` — страница товара
-- `favorites.html` — избранное
-- `seller_layout.html`, `seller_dashboard.html` и др. — кабинет продавца
-- `chat_list.html`, `chat_detail.html` — чаты
-- `login.html`, `register.html`, `become_seller.html` — авторизация
+```
+shop/
+├── base.html              # Основной layout (наследуют все)
+├── auth/
+│   ├── login.html
+│   ├── register.html
+│   └── become_seller.html
+├── pages/
+│   ├── home.html          # Главная / каталог
+│   ├── product_detail.html
+│   ├── favorites.html
+│   ├── profile.html
+│   ├── notifications.html
+│   └── support.html
+├── seller/
+│   ├── seller_layout.html # Layout кабинета продавца
+│   ├── seller_dashboard.html
+│   ├── seller_products.html
+│   ├── seller_brand.html
+│   ├── profile_seller.html
+│   ├── create_listing.html
+│   ├── chat_list_seller.html
+│   └── chat_detail_seller.html
+└── chat/
+    ├── chat_list.html
+    ├── chat_detail.html
+    └── message_edit.html
+```

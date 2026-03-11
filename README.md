@@ -14,12 +14,12 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 **PowerShell:**
 ```powershell
 cd D:\Shop
-.\setup.ps1
+.\scripts\setup.ps1
 ```
 
 **CMD или двойной клик:**
 ```
-setup.bat
+scripts\setup.bat
 ```
 
 Или вручную:
@@ -43,12 +43,12 @@ python manage.py createsuperuser
 
 **PowerShell:**
 ```powershell
-.\run.ps1
+.\scripts\run.ps1
 ```
 
 **CMD:**
 ```
-.\run.bat
+scripts\run.bat
 ```
 
 Или вручную: активировать venv → `python manage.py runserver`
@@ -72,6 +72,9 @@ python manage.py collectstatic
 - **config/** — настройки Django (settings, urls, wsgi)
 - **shop/** — приложение: модели, представления, шаблоны
 - **templates/** — HTML-шаблоны с Bootstrap 5
+- **static/** — CSS и JS (layout, pages, auth, seller, chat)
+- **docs/** — документация (USERS.md, SELLERS.md, RENDER_DEPLOY.md, STRUCTURE.md)
+- **scripts/** — скрипты запуска и установки (run.ps1, setup.bat и др.)
 
 ## Верхний бар
 

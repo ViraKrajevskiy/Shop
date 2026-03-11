@@ -99,6 +99,19 @@
     flex-shrink: 0;
     white-space: nowrap;
 }
+.seller-mobile-nav .seller-nav-btn-create {
+    background: var(--color-accent);
+    color: #fff;
+}
+.seller-mobile-nav .seller-nav-btn-create:hover {
+    background: var(--color-accent);
+    color: #fff;
+    opacity: 0.9;
+}
+.seller-mobile-nav .seller-nav-btn-create.active {
+    background: var(--color-accent);
+    color: #fff;
+}
 .seller-product-row {
     display: flex;
     align-items: center;

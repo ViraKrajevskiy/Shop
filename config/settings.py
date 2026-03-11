@@ -1,7 +1,3 @@
-"""
-Django settings for Shop project.
-"""
-
 import os
 from pathlib import Path
 from decouple import config, Csv
@@ -14,7 +10,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
-# Render.com — автодобавление хоста
+
 if config('RENDER', default=False, cast=bool):
     host = os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')
     if host:
@@ -32,7 +28,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+]
+try:
+    import whitenoise  # noqa: F401
+    MIDDLEWARE.append('whitenoise.middleware.WhiteNoiseMiddleware')
+except ImportError:
+    pass
+MIDDLEWARE += [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -64,7 +66,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# База данных: PostgreSQL на Render, иначе SQLite
+
 if config('DATABASE_URL', default=''):
     import dj_database_url
     DATABASES = {'default': dj_database_url.config(conn_max_age=600)}
@@ -94,7 +96,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+try:
+    import whitenoise  # noqa: F401
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+except ImportError:
+    pass  # по умолчанию Django использует StaticFilesStorage
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
