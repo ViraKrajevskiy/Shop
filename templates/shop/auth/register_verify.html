@@ -1,0 +1,41 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Подтверждение регистрации — Shop{% endblock %}
+
+{% block search_bar %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-blob-2"></div>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <a href="{% url 'home' %}">SHOP</a>
+            </div>
+            <h1>Код из письма</h1>
+            <p class="auth-subtitle">Мы отправили код на <strong>{{ email }}</strong>. Введите его ниже.</p>
+
+            <form method="post" action="{% url 'register_verify' %}">
+                {% csrf_token %}
+                <div class="mb-3 form-group">
+                    <label for="id_code" class="form-label">{{ form.code.label }}</label>
+                    <input type="text" name="code" id="id_code" class="form-control" placeholder="Введите код" required autofocus maxlength="10" value="{{ form.code.value|default:'' }}">
+                    {% if form.code.errors %}<ul class="errorlist">{% for e in form.code.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <button type="submit" class="btn btn-auth">
+                    <i class="bi bi-check-lg me-2"></i>Подтвердить
+                </button>
+            </form>
+
+            <div class="auth-switch mt-3">
+                <a href="{% url 'register' %}">← Вернуться к регистрации</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

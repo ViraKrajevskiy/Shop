@@ -27,7 +27,7 @@
 
     <div class="card p-4" style="max-width: 480px;">
         <h5 class="mb-3"><i class="bi bi-badge-tm me-1"></i>Мои бренды</h5>
-        <p class="text-muted small mb-3">Добавьте бренды, которыми вы владеете. Их можно будет выбрать при размещении товара.</p>
+        <p class="text-muted small mb-3">Добавьте бренды, которыми вы владеете. Новый бренд появится в списке «Мой бренд» после подтверждения модератором.</p>
         <form method="post" class="d-flex gap-2 mb-4">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_brand">
@@ -38,7 +38,7 @@
         <ul class="list-group list-group-flush">
             {% for b in owned_brands %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>{{ b.name }}</span>
+                <span>{{ b.name }}{% if b.status == 'pending' %} <span class="badge bg-warning text-dark">на подтверждении</span>{% endif %}</span>
                 <form method="post" class="mb-0" onsubmit="return confirm('Удалить бренд?');">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="delete_brand">

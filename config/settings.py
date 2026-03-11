@@ -108,6 +108,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Письма: в разработке — в консоль; в продакшене задайте EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Shop <noreply@shop.local>')
+
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'

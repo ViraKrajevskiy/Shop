@@ -35,6 +35,7 @@ urlpatterns = [
     path('product/<int:pk>/chat/', views.chat_start_product, name='chat_start_product'),
     path('login/', auth_views.LoginView.as_view(template_name='shop/auth/login.html'), name='login'),
     path('register/', views.register_view, name='register'),
+    path('register/verify/', views.register_verify_view, name='register_verify'),
     path('become-seller/', views.become_seller, name='become_seller'),
     path('profile/', views.profile_view, name='profile'),
     path('support/', views.support_view, name='support'),

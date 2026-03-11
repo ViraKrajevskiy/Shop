@@ -1,11 +1,21 @@
 from django.contrib import admin
 from django.utils import timezone
-from .models import Brand, Category, Product, ProductLike, ProductComment, UserFavorite, Chat, Message, ChatParticipant, UserProfile, SellerApplication
+from .models import Brand, Category, Product, ProductLike, ProductComment, UserFavorite, Chat, Message, ChatParticipant, UserProfile, SellerApplication, PendingRegistration
 
 
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'owner', 'status', 'id']
+    list_filter = ['status']
+    search_fields = ['name']
+    list_editable = ['status']
+    actions = ['approve_brands']
+
+    @admin.action(description='Подтвердить бренды')
+    def approve_brands(self, request, queryset):
+        from .models import Brand
+        updated = queryset.update(status=Brand.STATUS_APPROVED)
+        self.message_user(request, f'Подтверждено брендов: {updated}')
 
 
 @admin.register(Category)
@@ -115,3 +125,9 @@ class MessageAdmin(admin.ModelAdmin):
     def text_short(self, obj):
         return obj.text[:50] + '...' if len(obj.text) > 50 else obj.text
     text_short.short_description = 'Текст'
+
+
+@admin.register(PendingRegistration)
+class PendingRegistrationAdmin(admin.ModelAdmin):
+    list_display = ['email', 'username', 'code', 'created_at']
+    search_fields = ['email', 'username']

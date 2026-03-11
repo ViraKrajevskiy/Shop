@@ -8,17 +8,38 @@ User = get_user_model()
 
 
 class RegisterForm(UserCreationForm):
-    """Регистрация — только как покупатель. Статус продавца через заявку."""
+    """Шаг 1 регистрации: логин, email, пароль. Код отправляется на email."""
+
+    email = forms.EmailField(
+        label='Email',
+        required=True,
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'example@mail.com'})
+    )
 
     class Meta:
         model = User
-        fields = ('username', 'password1', 'password2')
+        fields = ('username', 'email', 'password1', 'password2')
 
-    def save(self, commit=True):
-        user = super().save(commit=commit)
-        if commit:
-            UserProfile.objects.get_or_create(user=user, defaults={'role': UserProfile.ROLE_USER})
-        return user
+    def clean_email(self):
+        email = (self.cleaned_data.get('email') or '').strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('Пользователь с таким email уже зарегистрирован.')
+        return email
+
+
+class RegisterVerifyForm(forms.Form):
+    """Шаг 2: ввод кода из email."""
+    code = forms.CharField(
+        label='Код из письма',
+        max_length=10,
+        min_length=4,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Введите код',
+            'autocomplete': 'one-time-code',
+            'inputmode': 'numeric',
+        })
+    )
 
 
 class BecomeSellerForm(forms.Form):
@@ -43,11 +64,10 @@ class BecomeSellerForm(forms.Form):
 
 
 class ProductForm(forms.ModelForm):
-    """Форма подачи объявления о товаре. Бренд выбирается: свой / другой / добавить новый."""
+    """Форма подачи объявления. Бренд: свой (подтверждённый) или из каталога. Новый бренд добавляется отдельно в разделе «Магазин и бренды»."""
 
     BRAND_MY = 'my'
     BRAND_EXISTING = 'existing'
-    BRAND_NEW = 'new'
 
     brand_mode = forms.ChoiceField(
         label='Бренд товара',
@@ -64,12 +84,6 @@ class ProductForm(forms.ModelForm):
         required=False,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
-    brand_new_name = forms.CharField(
-        label='Название нового бренда',
-        max_length=100,
-        required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите название'})
-    )
 
     def __init__(self, *args, user=None, **kwargs):
         self._user = user
@@ -78,14 +92,13 @@ class ProductForm(forms.ModelForm):
         self.fields['category'].empty_label = '— Выберите тип товара —'
         self.fields['category'].label = 'Тип товара'
 
-        owned = Brand.objects.filter(owner=self._user).order_by('name') if self._user else []
-        all_brands = Brand.objects.order_by('name')
+        owned = Brand.objects.filter(owner=self._user, status=Brand.STATUS_APPROVED).order_by('name') if self._user else Brand.objects.none()
+        all_brands = Brand.objects.filter(status=Brand.STATUS_APPROVED).order_by('name')
 
         choices = []
         if owned:
             choices.append((self.BRAND_MY, 'Мой бренд'))
         choices.append((self.BRAND_EXISTING, 'Выбрать из списка'))
-        choices.append((self.BRAND_NEW, 'Добавить новый бренд'))
 
         self.fields['brand_mode'].choices = choices
         if owned and not self.initial.get('brand_mode'):
@@ -96,15 +109,12 @@ class ProductForm(forms.ModelForm):
         self.fields['brand_my_id'].empty_label = '— Выберите —'
         self.fields['brand_existing_id'].queryset = all_brands
         self.fields['brand_existing_id'].empty_label = '— Выберите бренд —'
-        self._owned_brands = list(owned)
-        self._all_brands = list(all_brands)
 
     def clean(self):
         data = super().clean()
         mode = data.get('brand_mode')
         brand_my_id = data.get('brand_my_id')
         brand_existing_id = data.get('brand_existing_id')
-        brand_new_name = (data.get('brand_new_name') or '').strip()
 
         if mode == self.BRAND_MY:
             if not brand_my_id:
@@ -116,11 +126,6 @@ class ProductForm(forms.ModelForm):
                 self.add_error('brand_mode', 'Выберите бренд из списка')
                 return data
             data['_resolved_brand'] = brand_existing_id
-        elif mode == self.BRAND_NEW:
-            if not brand_new_name:
-                self.add_error('brand_new_name', 'Введите название бренда')
-                return data
-            data['_brand_to_create'] = brand_new_name
         return data
 
     class Meta:

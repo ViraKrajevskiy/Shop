@@ -6,7 +6,7 @@ from django.db.models import Q, Count
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model, login, logout
-from .models import Product, Category, Brand, Chat, ChatParticipant, Message, ProductLike, ProductComment, UserFavorite, UserProfile, Notification, SellerFollow, SellerApplication
+from .models import Product, Category, Brand, Chat, ChatParticipant, Message, ProductLike, ProductComment, UserFavorite, UserProfile, Notification, SellerFollow, SellerApplication, PendingRegistration
 from decimal import Decimal
 
 
@@ -260,16 +260,27 @@ def favorites_list(request):
     })
 
 
-@login_required
 def become_seller(request):
-    """Заявка на статус продавца — отправляется на модерацию"""
+    """Заявка на статус продавца. Форму видят все; отправить могут только авторизованные."""
+    if not request.user.is_authenticated:
+        if request.method == 'POST':
+            messages.warning(request, 'Войдите или зарегистрируйтесь, чтобы отправить заявку.')
+            from django.contrib.auth.views import redirect_to_login
+            return redirect_to_login(request.get_full_path())
+        from .forms import BecomeSellerForm
+        return render(request, 'shop/auth/become_seller.html', {
+            'form': BecomeSellerForm(),
+            'pending_application': None,
+            'show_login_prompt': True,
+        })
+
     profile = getattr(request.user, 'profile', None)
     if profile and profile.is_businessman:
         messages.info(request, 'Вы уже зарегистрированы как продавец.')
         return redirect('create_listing')
     pending = SellerApplication.objects.filter(user=request.user, status=SellerApplication.STATUS_PENDING).first()
     if pending:
-        return render(request, 'shop/auth/become_seller.html', {'form': None, 'pending_application': pending})
+        return render(request, 'shop/auth/become_seller.html', {'form': None, 'pending_application': pending, 'show_login_prompt': False})
     if request.method == 'POST':
         from .forms import BecomeSellerForm
         form = BecomeSellerForm(request.POST)
@@ -285,26 +296,87 @@ def become_seller(request):
     else:
         from .forms import BecomeSellerForm
         form = BecomeSellerForm()
-    return render(request, 'shop/auth/become_seller.html', {'form': form})
+    return render(request, 'shop/auth/become_seller.html', {'form': form, 'show_login_prompt': False})
 
 
 def register_view(request):
-    """Регистрация: обычный пользователь или продавец (бизнесмен)"""
+    """Регистрация шаг 1: логин, email, пароль. Отправка кода на email."""
     if request.user.is_authenticated:
         return redirect('home')
     if request.method == 'POST':
         from .forms import RegisterForm
+        from django.contrib.auth.hashers import make_password
+        import random
+        from django.core.mail import send_mail
+        from django.conf import settings as django_settings
+
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, f'Добро пожаловать, {user.username}!')
-            next_url = request.GET.get('next') or request.POST.get('next') or '/'
-            return redirect(next_url)
+            email = (form.cleaned_data['email'] or '').strip().lower()
+            username = form.cleaned_data['username']
+            raw_password = form.cleaned_data['password1']
+            code = str(random.randint(100000, 999999))
+
+            PendingRegistration.objects.filter(email=email).delete()
+            PendingRegistration.objects.create(
+                email=email,
+                username=username,
+                password=make_password(raw_password),
+                code=code,
+            )
+            request.session['register_email'] = email
+            request.session['register_next'] = request.POST.get('next') or request.GET.get('next') or '/'
+
+            subject = 'Код подтверждения регистрации — Shop'
+            message = f'Здравствуйте!\n\nВаш код для завершения регистрации: {code}\n\nВведите его на странице регистрации. Код действителен 24 часа.'
+            send_mail(
+                subject,
+                message,
+                getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'noreply@shop.local'),
+                [email],
+                fail_silently=False,
+            )
+            messages.success(request, f'Код отправлен на {email}. Введите его ниже.')
+            return redirect('register_verify')
     else:
         from .forms import RegisterForm
         form = RegisterForm()
     return render(request, 'shop/auth/register.html', {'form': form})
+
+
+def register_verify_view(request):
+    """Регистрация шаг 2: ввод кода из email, создание аккаунта."""
+    if request.user.is_authenticated:
+        return redirect('home')
+    email = request.session.get('register_email')
+    if not email:
+        messages.warning(request, 'Сначала заполните форму регистрации и запросите код.')
+        return redirect('register')
+
+    if request.method == 'POST':
+        from .forms import RegisterVerifyForm
+        form = RegisterVerifyForm(request.POST)
+        if form.is_valid():
+            code = (form.cleaned_data['code'] or '').strip()
+            pending = PendingRegistration.objects.filter(email=email, code=code).first()
+            if not pending:
+                form.add_error('code', 'Неверный или устаревший код. Запросите новый код на шаге регистрации.')
+            else:
+                User = get_user_model()
+                user = User(username=pending.username, email=pending.email)
+                user.password = pending.password
+                user.save()
+                UserProfile.objects.get_or_create(user=user, defaults={'role': UserProfile.ROLE_USER})
+                pending.delete()
+                next_url = request.session.pop('register_next', '/')
+                request.session.pop('register_email', None)
+                login(request, user)
+                messages.success(request, f'Добро пожаловать, {user.username}!')
+                return redirect(next_url)
+        return render(request, 'shop/auth/register_verify.html', {'form': form, 'email': email})
+
+    from .forms import RegisterVerifyForm
+    return render(request, 'shop/auth/register_verify.html', {'form': RegisterVerifyForm(), 'email': email})
 
 
 @login_required
@@ -325,11 +397,8 @@ def create_listing(request):
             product.publication_status = Product.STATUS_PENDING
 
             resolved = form.cleaned_data.get('_resolved_brand')
-            brand_new = form.cleaned_data.get('_brand_to_create')
             if resolved:
                 product.brand = resolved
-            elif brand_new:
-                product.brand = Brand.objects.create(name=brand_new, owner=request.user)
 
             product.save()
             messages.success(request, 'Объявление размещено! Оно появится в каталоге после модерации.')
@@ -411,8 +480,16 @@ def seller_brand(request):
         elif action == 'add_brand':
             name = (request.POST.get('brand_name') or '').strip()
             if name:
-                Brand.objects.get_or_create(name=name, owner=request.user)
-                messages.success(request, f'Бренд «{name}» добавлен.')
+                brand, created = Brand.objects.get_or_create(
+                    name=name, owner=request.user,
+                    defaults={'status': Brand.STATUS_PENDING}
+                )
+                if created:
+                    messages.success(request, 'Бренд добавлен и будет доступен после подтверждения модератором.')
+                elif brand.status == Brand.STATUS_APPROVED:
+                    messages.info(request, f'Бренд «{name}» уже в вашем списке.')
+                else:
+                    messages.info(request, 'Заявка на этот бренд уже отправлена и ожидает подтверждения.')
             else:
                 messages.warning(request, 'Введите название бренда.')
         elif action == 'delete_brand':

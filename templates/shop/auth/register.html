@@ -18,7 +18,7 @@
                 <a href="{% url 'home' %}">SHOP</a>
             </div>
             <h1>Регистрация</h1>
-            <p class="auth-subtitle">Создайте аккаунт для покупок. Статус продавца — через заявку после входа.</p>
+            <p class="auth-subtitle">Создайте аккаунт. На указанный email придёт код для подтверждения. Статус продавца — через заявку после входа.</p>
 
             <form method="post" action="{% url 'register' %}">
                 {% csrf_token %}
@@ -28,6 +28,11 @@
                     <label for="id_username" class="form-label">Логин</label>
                     <input type="text" name="username" id="id_username" class="form-control" placeholder="Придумайте логин" required autofocus value="{{ form.username.value|default:'' }}">
                     {% if form.username.errors %}<ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+                <div class="mb-3 form-group">
+                    <label for="id_email" class="form-label">Email</label>
+                    <input type="email" name="email" id="id_email" class="form-control" placeholder="example@mail.com" required value="{{ form.email.value|default:'' }}">
+                    {% if form.email.errors %}<ul class="errorlist">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
                 </div>
                 <div class="mb-3 form-group">
                     <label for="id_password1" class="form-label">Пароль</label>

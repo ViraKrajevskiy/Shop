@@ -57,13 +57,7 @@
                                 <label class="form-label small text-muted">Выберите бренд из каталога</label>
                                 {{ form.brand_existing_id }}
                             </div>
-                            <div class="brand-option brand-option-new" data-mode="new">
-                                <label class="form-label small text-muted">Название нового бренда</label>
-                                {{ form.brand_new_name }}
-                                {% if form.brand_new_name.errors %}
-                                <ul class="errorlist">{% for e in form.brand_new_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-                                {% endif %}
-                            </div>
+                            <p class="small text-muted mt-2 mb-0">Нет нужного бренда? <a href="{% url 'seller_brand' %}">Добавьте его в разделе «Магазин и бренды»</a> — после подтверждения модератором он появится в списке «Мой бренд».</p>
                         </div>
                         <div class="mb-4">
                             <label for="id_image" class="form-label">Фото товара</label>
@@ -117,7 +111,7 @@
         options.forEach(function(el) {
             var active = el.dataset.mode === val;
             el.style.display = active ? 'block' : 'none';
-            el.querySelectorAll('select, input').forEach(function(ctl) {
+            el.querySelectorAll('select').forEach(function(ctl) {
                 if (active) ctl.removeAttribute('disabled');
                 else ctl.setAttribute('disabled', 'disabled');
             });
